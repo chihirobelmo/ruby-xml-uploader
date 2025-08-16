@@ -285,4 +285,40 @@ def download
     head :not_found
   end
 end
-````
+```
+
+
+
+> REST APIだと例えばどのようなコマンドの送信ができますか。例えばC#でこのAPIへファイルを送信するにはどうしますか
+
+REST APIでファイルをアップロードする場合、multipart/form-data形式でPOSTリクエストを送信します。
+C#の場合、HttpClientとMultipartFormDataContentを使ってファイルを送信できます。
+
+```cs
+using System.Net.Http;
+using System.Threading.Tasks;
+
+public async Task UploadXmlFileAsync(string apiUrl, string filePath, string title)
+{
+    using var client = new HttpClient();
+    using var form = new MultipartFormDataContent();
+    form.Add(new StringContent(title), "title");
+    form.Add(new ByteArrayContent(System.IO.File.ReadAllBytes(filePath)), "xml_file", "sample.xml");
+
+    var response = await client.PostAsync(apiUrl, form);
+    string result = await response.Content.ReadAsStringAsync();
+    // 結果の処理
+}
+```
+
+```bash
+curl -X POST http://localhost:3000/api/xml_documents \
+  -F "title=sample" \
+  -F "xml_file=@sample.xml"
+```
+
+C#でもcurlでも、
+
+"title"はテキスト
+"xml_file"はファイル（@ファイル名やByteArrayContent）
+この形式でAPIに送信できます。
