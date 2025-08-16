@@ -1,0 +1,16 @@
+<!-- filepath: /home/chihiro/source/uploader/app/views/xml_documents/new.html.erb -->
+<h1>XMLファイルのアップロード</h1>
+
+<%= form_with model: @xml_document, local: true do |form| %>
+  <div>
+    <%= form.label :title, "タイトル" %>
+    <%= form.text_field :title %>
+  </div>
+  <div>
+    <%= form.label :xml_file, "XMLファイル" %>
+    <%= form.file_field :xml_file %>
+  </div>
+  <div>
+    <%= form.submit "アップロード" %>
+  </div>
+<% end %>
