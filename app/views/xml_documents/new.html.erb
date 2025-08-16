@@ -1,7 +1,22 @@
 <!-- filepath: /home/chihiro/source/uploader/app/views/xml_documents/new.html.erb -->
+
 <h1>XMLファイルのアップロード</h1>
 
-<%= form_with model: @xml_document, local: true do |form| %>
+<% if @xml_document.errors.any? %>
+  <div class="alert alert-danger">
+    <ul>
+      <% @xml_document.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<div style="color: red; font-size: small;">
+  <%= @xml_document.errors.full_messages.inspect %>
+</div>
+
+<%= form_with model: @xml_document, local: true, html: { multipart: true } do |form| %>
   <div>
     <%= form.label :title, "タイトル" %>
     <%= form.text_field :title %>

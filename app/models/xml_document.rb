@@ -1,16 +1,11 @@
 # encoding: UTF-8
 class XmlDocument < ApplicationRecord
-  has_one_attached :xml_file
+    has_one_attached :xml_file
 
-  validates :title, presence: true
-  validates :xml_file, presence: true
-  validate :xml_file_type
+    validates :title, presence: true
+    validate :xml_file_presence
 
-  private
-
-  def xml_file_type
-    if xml_file.attached? && xml_file.content_type != 'text/xml'
-      errors.add(:xml_file, 'はXMLファイルのみアップロードできます')
+    def xml_file_presence
+    errors.add(:xml_file, 'を添付してください') unless xml_file.attached?
     end
-  end
 end
