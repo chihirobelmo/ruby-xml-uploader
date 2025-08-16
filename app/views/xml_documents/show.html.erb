@@ -1,0 +1,17 @@
+<!-- app/views/xml_documents/show.html.erb -->
+
+<h1>XMLファイル詳細</h1>
+
+<p><strong>タイトル:</strong> <%= @xml_document.title %></p>
+<p><strong>説明:</strong> <%= @xml_document.description %></p>
+
+<% if @xml_document.xml_file.attached? %>
+  <p>
+    <strong>ファイル名:</strong> <%= @xml_document.xml_file.filename %><br>
+    <%= link_to 'XMLファイルをダウンロード', rails_blob_path(@xml_document.xml_file, disposition: "attachment"), target: "_blank" %>
+  </p>
+<% else %>
+  <p>XMLファイルは添付されていません。</p>
+<% end %>
+
+<%= link_to '一覧へ戻る', xml_documents_path %>
