@@ -23,6 +23,17 @@
   </head>
 
   <body>
+    <div style="padding: 8px; border-bottom: 1px solid #eee; margin-bottom: 12px;">
+      <% if user_signed_in? %>
+        <span>ログイン中: <%= current_user.email %></span>
+        | <%= button_to 'ログアウト', logout_path, method: :delete, form: { style: 'display:inline' } %>
+      <% else %>
+        <%= link_to 'ログイン', login_path %> | <%= link_to 'ユーザー登録', signup_path %>
+      <% end %>
+      <% flash.each do |k, v| %>
+        <div class="flash <%= k %>"><%= v %></div>
+      <% end %>
+    </div>
     <%= yield %>
   </body>
 </html>

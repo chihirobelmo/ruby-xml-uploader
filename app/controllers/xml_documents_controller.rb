@@ -1,6 +1,7 @@
 # encoding: UTF-8
 # app/controllers/xml_documents_controller.rb
 class XmlDocumentsController < ApplicationController
+  before_action :require_login, only: [:new, :create, :edit, :update, :destroy]
   before_action :set_xml_document, only: [:show, :edit, :update, :destroy, :download]
 
   def index
