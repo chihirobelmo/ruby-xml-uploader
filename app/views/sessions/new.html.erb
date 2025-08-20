@@ -10,6 +10,11 @@
     <%= password_field_tag :password %>
   </div>
   <div>
+    <label>
+      <%= check_box_tag :remember_me, '1' %> ログイン状態を保持する
+    </label>
+  </div>
+  <div>
     <%= submit_tag 'ログイン' %>
   </div>
 <% end %>
