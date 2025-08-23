@@ -6,7 +6,7 @@ class XmlDocumentsController < ApplicationController
 
   def index
   # Eager-load attachment to avoid N+1 when rendering JSON
-  @xml_documents = XmlDocument.with_attached_xml_file.all
+  @xml_documents = XmlDocument.with_attached_xml_file.includes(:user).all
   end
 
   def show

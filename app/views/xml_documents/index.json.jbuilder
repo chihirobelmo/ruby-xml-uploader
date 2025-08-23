@@ -1,5 +1,12 @@
 json.array! @xml_documents do |doc|
   json.extract! doc, :id, :title, :description, :device_name, :user_id, :created_at, :updated_at
+  if doc.user
+    json.uploader do
+      json.id doc.user.id
+      json.username doc.user.username
+      json.email doc.user.email
+    end
+  end
   if doc.xml_file.attached?
     json.file do
       json.filename doc.xml_file.filename.to_s
