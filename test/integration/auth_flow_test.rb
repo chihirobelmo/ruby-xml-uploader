@@ -10,6 +10,7 @@ class AuthFlowTest < ActionDispatch::IntegrationTest
     assert_difference "User.count", 1 do
       post "/signup", params: {
         user: {
+          username: "flow-user",
           email: "flow@example.com",
           password: "password",
           password_confirmation: "password"

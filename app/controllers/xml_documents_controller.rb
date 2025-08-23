@@ -6,7 +6,7 @@ class XmlDocumentsController < ApplicationController
 
   def index
   # Eager-load attachment to avoid N+1 when rendering JSON
-  @xml_documents = XmlDocument.with_attached_xml_file.all
+  @xml_documents = XmlDocument.with_attached_xml_file.includes(:user).all
   end
 
   def show
@@ -17,7 +17,8 @@ class XmlDocumentsController < ApplicationController
   end
 
   def create
-    @xml_document = XmlDocument.new(xml_document_params)
+  @xml_document = XmlDocument.new(xml_document_params)
+  @xml_document.user = current_user if user_signed_in?
     
     if @xml_document.save
   redirect_to @xml_document, notice: 'XML file uploaded successfully.'

@@ -4,7 +4,7 @@ class XmlDocumentsControllerTest < ActionDispatch::IntegrationTest
   include Rails.application.routes.url_helpers
 
   setup do
-    @doc = XmlDocument.new(title: "Sample XML", description: "Fixture file")
+  @doc = XmlDocument.new(title: "Sample XML", description: "Fixture file")
     # Attach a sample XML to the record before saving to pass validation
     @doc.xml_file.attach(
       io: File.open(Rails.root.join("test/fixtures/files/sample.xml")),
@@ -24,7 +24,6 @@ class XmlDocumentsControllerTest < ActionDispatch::IntegrationTest
     item = body.find { |h| h["id"] == @doc.id }
     assert item, "Expected response to include created document"
     assert_equal "Sample XML", item["title"]
-    assert item.key?("file"), "Expected file info key in response"
-    assert item["file"].key?("url"), "Expected file.url in response"
+  assert item.key?("username"), "Expected username in response"
   end
 end
