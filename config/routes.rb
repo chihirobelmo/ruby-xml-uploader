@@ -13,6 +13,10 @@ Rails.application.routes.draw do
       get :download
     end
   end
+
+  namespace :api do
+    resources :xml_documents, only: [:index]
+  end
   
   root 'xml_documents#index'
 end
