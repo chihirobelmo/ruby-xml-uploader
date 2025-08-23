@@ -17,7 +17,8 @@ class XmlDocumentsController < ApplicationController
   end
 
   def create
-    @xml_document = XmlDocument.new(xml_document_params)
+  @xml_document = XmlDocument.new(xml_document_params)
+  @xml_document.user = current_user if user_signed_in?
     
     if @xml_document.save
   redirect_to @xml_document, notice: 'XML file uploaded successfully.'

@@ -31,3 +31,9 @@ rm -rf storage/*
 # ‚»‚ÌŒãA•K—v‚È‚çDB‚ğÄì¬
 bin/rails db:setup
 ```
+
+ÅŒã‚É”O‚Ì‚½‚ß
+
+```
+bin/rails restart
+```

@@ -1,5 +1,6 @@
 # encoding: UTF-8
 class XmlDocument < ApplicationRecord
+    belongs_to :user, optional: true
     has_one_attached :xml_file
 
     validates :title, presence: true
