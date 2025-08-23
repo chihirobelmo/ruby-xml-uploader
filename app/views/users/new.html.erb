@@ -1,19 +1,24 @@
-<h1>ユーザー登録</h1>
+<%# encoding: UTF-8 %>
+<h1>Sign up</h1>
 
 <%= form_with model: @user, url: signup_path, local: true do |f| %>
   <div>
-    <%= f.label :email, 'メールアドレス' %>
+    <%= f.label :email, 'Email' %>
     <%= f.email_field :email %>
   </div>
   <div>
-    <%= f.label :password, 'パスワード' %>
+    <%= f.label :username, 'Username' %>
+    <%= f.text_field :username %>
+  </div>
+  <div>
+    <%= f.label :password, 'Password' %>
     <%= f.password_field :password %>
   </div>
   <div>
-    <%= f.label :password_confirmation, 'パスワード確認' %>
+    <%= f.label :password_confirmation, 'Password confirmation' %>
     <%= f.password_field :password_confirmation %>
   </div>
   <div>
-    <%= f.submit '登録' %>
+    <%= f.submit 'Create account' %>
   </div>
 <% end %>
