@@ -26,4 +26,8 @@
 
 <br>
 
-<%= link_to '新規XMLファイルアップロード', new_xml_document_path %>
+<% if user_signed_in? %>
+  <%= link_to '新規アップロード', new_xml_document_path %>
+<% else %>
+  <p>アップロードはログイン後に利用できます。</p>
+<% end %>
