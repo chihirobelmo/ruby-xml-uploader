@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_23_000003) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_24_000000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -62,7 +62,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_23_000003) do
     t.index ["user_id"], name: "index_xml_documents_on_user_id"
   end
 
+  create_table "xml_downloads", force: :cascade do |t|
+    t.integer "xml_document_id", null: false
+    t.integer "user_id"
+    t.string "ip"
+    t.string "user_agent"
+    t.string "session_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_xml_downloads_on_user_id"
+    t.index ["xml_document_id", "created_at"], name: "index_xml_downloads_on_xml_document_id_and_created_at"
+    t.index ["xml_document_id"], name: "index_xml_downloads_on_xml_document_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "xml_documents", "users"
+  add_foreign_key "xml_downloads", "users"
+  add_foreign_key "xml_downloads", "xml_documents"
 end
