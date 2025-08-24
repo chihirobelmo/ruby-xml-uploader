@@ -3,6 +3,7 @@ module Api
   class XmlDocumentsController < ApplicationController
   include ApiAuthenticatable
   skip_before_action :authenticate_bearer!, only: [:index, :download]
+  protect_from_forgery with: :null_session
 
     # GET /api/xml_documents.json (public)
     def index
@@ -39,6 +40,27 @@ module Api
       end
 
       redirect_to rails_blob_path(doc.xml_file, disposition: "attachment")
+    end
+
+    # POST /api/xml_documents (protected: Bearer)
+    # Accepts multipart/form-data:
+    #   - title (required)
+    #   - description (optional)
+    #   - xml_file (required) => attached file
+    def create
+      title       = params.dig(:xml_document, :title) || params[:title]
+      description = params.dig(:xml_document, :description) || params[:description]
+      file_param  = params.dig(:xml_document, :xml_file) || params[:xml_file]
+
+      xml_document = XmlDocument.new(title: title, description: description)
+      xml_document.user = current_api_user if defined?(current_api_user)
+      xml_document.xml_file.attach(file_param) if file_param.present?
+
+      if xml_document.save
+        render json: { id: xml_document.id, title: xml_document.title, device_name: xml_document.device_name }, status: :created
+      else
+        render json: { errors: xml_document.errors.full_messages }, status: :unprocessable_entity
+      end
     end
   end
 end
