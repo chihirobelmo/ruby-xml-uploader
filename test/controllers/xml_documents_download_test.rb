@@ -17,4 +17,11 @@ class XmlDocumentsDownloadTest < ActionDispatch::IntegrationTest
       assert_response :redirect
     end
   end
+
+  test "HEAD does not create a download event" do
+    assert_no_difference -> { XmlDownload.count } do
+      head download_xml_document_path(@doc)
+  assert_response :redirect
+    end
+  end
 end
