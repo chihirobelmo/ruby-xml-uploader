@@ -322,3 +322,54 @@ C#でもcurlでも、
 "title"はテキスト
 "xml_file"はファイル（@ファイル名やByteArrayContent）
 この形式でAPIに送信できます。
+
+## ユーザ管理
+
+Gemfileに次の行を追加して`bundle install`を行う
+
+```ruby
+gem "bcrypt", "~> 3.1"
+```
+
+追加: Userモデル（has_secure_password）
+追加: サインアップ/ログイン/ログアウトのコントローラとビュー
+変更: 認証ヘルパーとbefore_actionでXmlDocumentsのnew/create等を保護
+変更: レイアウトにログイン状態とフラッシュを表示
+変更: 一覧から未ログイン時は新規アップロードリンクを非表示
+実行: bundle install, rails db:migrate
+
+### 改善候補
+
+- フラッシュのスタイル整備
+- パスワード最小長などの追加バリデーション
+- CSRF例外設定のAPI分離が必要ならAPI用のBaseControllerを切り出し
+
+## remember_me
+
+安全な永続ログイン用トークンを使い、サインイン時に署名付きCookieへ保存、次回アクセスで自動ログイン
+
+- DB: usersにremember_digestを追加（マイグレーション済み）
+- Model: Userにrememberトークン生成/検証/破棄のヘルパーを実装
+- Controller:
+  - ApplicationController.current_userでCookieからの自動復元に対応
+  - SessionsControllerでremember_meチェックボックスを処理、Cookie設定/削除
+- View: ログイン画面に「ログイン状態を保持する」チェックボックス追加
+
+### 実装のポイント
+
+- Cookieは署名付き（cookies.permanent.signed[:user_id]）とトークンの平文（remember_token）をそれぞれ保存
+- DBにはハッシュ化したremember_digestのみ保持（トークン平文は保持しない）
+- current_userはセッション → Cookieの順で復元、Cookie一致時はセッション再セット
+
+### 改善候補
+
+- CookieのSameSite/secure/httponlyのポリシー調整（本番はsecure: trueを推奨、HTTPS前提）
+- rememberトークンの有効期限を短縮したい場合はpermanentではなく一定期間に
+- 端末別にrememberを無効化したい場合はrememberトークンを別テーブルで複数持たせる運用に拡張
+
+## 改善候補
+
+注意と今後の改善（任意）
+現仕様はトークン照合で全ユーザーを走査します。ユーザー数が多い場合は、検索用ハッシュ（例: SHA-256）を別カラムに保存してO(1)検索に改善可。
+トークン期限（例: 90日）やローテーション方針をルール化するとより安全です。
+API用リクエスト/システムテストの追加を推奨。

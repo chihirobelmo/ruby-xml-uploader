@@ -1,0 +1,21 @@
+<%# encoding: UTF-8 %>
+<h1>Log in</h1>
+
+<%= form_with url: login_path, local: true do |f| %>
+  <div>
+    <%= label_tag :email, 'Email' %>
+    <%= email_field_tag :email %>
+  </div>
+  <div>
+    <%= label_tag :password, 'Password' %>
+    <%= password_field_tag :password %>
+  </div>
+  <div>
+    <label>
+      <%= check_box_tag :remember_me, '1' %> Keep me signed in
+    </label>
+  </div>
+  <div>
+    <%= submit_tag 'Log in' %>
+  </div>
+<% end %>

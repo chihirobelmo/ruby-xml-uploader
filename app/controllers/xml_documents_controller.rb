@@ -1,10 +1,14 @@
 # encoding: UTF-8
 # app/controllers/xml_documents_controller.rb
 class XmlDocumentsController < ApplicationController
+  before_action :require_login, only: [:new, :create, :edit, :update, :destroy]
   before_action :set_xml_document, only: [:show, :edit, :update, :destroy, :download]
 
   def index
-    @xml_documents = XmlDocument.all
+  # Eager-load attachment to avoid N+1 when rendering JSON
+  @xml_documents = XmlDocument.with_attached_xml_file.includes(:user).all
+  # Preload download counts without N+1 queries
+  @download_counts = XmlDownload.group(:xml_document_id).count
   end
 
   def show
@@ -15,10 +19,11 @@ class XmlDocumentsController < ApplicationController
   end
 
   def create
-    @xml_document = XmlDocument.new(xml_document_params)
+  @xml_document = XmlDocument.new(xml_document_params)
+  @xml_document.user = current_user if user_signed_in?
     
     if @xml_document.save
-      redirect_to @xml_document, notice: 'XMLファイルが正常にアップロードされました。'
+  redirect_to @xml_document, notice: 'XML file uploaded successfully.'
     else
       render :new
     end
@@ -29,7 +34,7 @@ class XmlDocumentsController < ApplicationController
 
   def update
     if @xml_document.update(xml_document_params)
-      redirect_to @xml_document, notice: 'XMLファイルが正常に更新されました。'
+  redirect_to @xml_document, notice: 'XML file updated successfully.'
     else
       render :edit
     end
@@ -37,10 +42,21 @@ class XmlDocumentsController < ApplicationController
 
   def destroy
     @xml_document.destroy
-    redirect_to xml_documents_path, notice: 'XMLファイルが正常に削除されました。'
+  redirect_to xml_documents_path, notice: 'XML file deleted successfully.'
   end
 
   def download
+    # Only count on real GET requests (skip HEAD preflight)
+    if request.get?
+      # Record download event asynchronously in future if performance needed
+      XmlDownload.create!(
+        xml_document: @xml_document,
+        user: (current_user if respond_to?(:current_user) && user_signed_in?),
+        ip: request.remote_ip,
+        user_agent: request.user_agent,
+        session_id: request.session_options[:id]
+      )
+    end
     redirect_to rails_blob_path(@xml_document.xml_file, disposition: "attachment")
   end
 
