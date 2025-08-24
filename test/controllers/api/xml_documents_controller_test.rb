@@ -73,4 +73,25 @@ class Api::XmlDocumentsControllerTest < ActionDispatch::IntegrationTest
     assert item, "expected aggregated item present"
     assert_equal 5, item["download_count"], "expected aggregated download_count across group"
   end
+
+  test "JSON is sorted by download_count desc (then created_at)" do
+    user = User.create!(email: "sort@example.com", username: "sorter", password: "secret123", password_confirmation: "secret123")
+    # Group A with 1 download
+    a = XmlDocument.new(title: "S", description: "a", user: user)
+    a.xml_file.attach(io: File.open(Rails.root.join("test/fixtures/files/sample.xml")), filename: "Setup.v100.DeviceS {A1}.xml", content_type: "application/xml")
+    a.save!
+    XmlDownload.create!(xml_document: a)
+
+    # Group B with 3 downloads
+    b = XmlDocument.new(title: "T", description: "b", user: user)
+    b.xml_file.attach(io: File.open(Rails.root.join("test/fixtures/files/sample.xml")), filename: "Setup.v100.DeviceT {B1}.xml", content_type: "application/xml")
+    b.save!
+    3.times { XmlDownload.create!(xml_document: b) }
+
+    get "/api/xml_documents.json"
+    assert_response :success
+    body = JSON.parse(@response.body)
+    # First item should be the higher download_count group (B)
+    assert_equal "T", body.first["title"]
+  end
 end

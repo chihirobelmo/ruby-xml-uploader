@@ -9,7 +9,13 @@ totals = XmlDownload
   .group("xml_documents.user_id", "xml_documents.title", "xml_documents.device_name")
   .count
 
-json.array! docs do |doc|
+# Sort by download_count desc, tie-breaker by created_at desc
+sorted_docs = docs.sort_by do |d|
+  count = totals[[d.user_id, d.title, d.device_name]] || 0
+  [-count, -(d.created_at || Time.at(0)).to_i]
+end
+
+json.array! sorted_docs do |doc|
   json.id doc.id
   json.title doc.title
   json.description doc.description
