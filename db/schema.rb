@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_24_000000) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_24_064001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -46,6 +46,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_000000) do
     t.datetime "updated_at", null: false
     t.string "remember_digest"
     t.string "username", default: "", null: false
+    t.string "api_token_digest"
+    t.datetime "api_token_generated_at"
+    t.index ["api_token_digest"], name: "index_users_on_api_token_digest", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["remember_digest"], name: "index_users_on_remember_digest"
     t.index ["username"], name: "index_users_on_username", unique: true
