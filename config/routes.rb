@@ -15,7 +15,14 @@ Rails.application.routes.draw do
   end
 
   namespace :api do
-    resources :xml_documents, only: [:index]
+  # Bearer token issue/revoke
+  resource :token, only: [:create, :destroy], controller: "tokens"
+  # Protected API endpoints
+  resources :xml_documents, only: [:index, :create] do
+      member do
+        get :download
+      end
+    end
   end
   
   root 'xml_documents#index'
