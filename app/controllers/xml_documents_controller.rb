@@ -44,6 +44,14 @@ class XmlDocumentsController < ApplicationController
   end
 
   def download
+    # Record download event asynchronously in future if performance needed
+    XmlDownload.create!(
+      xml_document: @xml_document,
+      user: (current_user if respond_to?(:current_user) && user_signed_in?),
+      ip: request.remote_ip,
+      user_agent: request.user_agent,
+      session_id: request.session_options[:id]
+    )
     redirect_to rails_blob_path(@xml_document.xml_file, disposition: "attachment")
   end
 

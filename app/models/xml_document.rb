@@ -2,6 +2,7 @@
 class XmlDocument < ApplicationRecord
     belongs_to :user, optional: true
     has_one_attached :xml_file
+    has_many :xml_downloads, dependent: :destroy
 
     validates :title, presence: true
     validate :xml_file_presence
