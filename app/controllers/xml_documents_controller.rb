@@ -7,6 +7,8 @@ class XmlDocumentsController < ApplicationController
   def index
   # Eager-load attachment to avoid N+1 when rendering JSON
   @xml_documents = XmlDocument.with_attached_xml_file.includes(:user).all
+  # Preload download counts without N+1 queries
+  @download_counts = XmlDownload.group(:xml_document_id).count
   end
 
   def show
