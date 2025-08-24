@@ -7,7 +7,17 @@ module Api
 
     # GET /api/xml_documents.json (public)
     def index
-      @xml_documents = XmlDocument.with_attached_xml_file.includes(:user).order(created_at: :desc)
+      scope = XmlDocument.with_attached_xml_file.includes(:user).order(created_at: :desc)
+
+      # Optional filtering by multiple device names
+      # Accepts: ?device_name=Foo,Bar or ?device_name[]=Foo&device_name[]=Bar or ?device_names=Foo,Bar
+      names_param = params[:device_name].presence || params[:device_names].presence
+      names = Array(names_param).flat_map { |v| v.to_s.split(',') }
+            .map { |s| s.to_s.strip }
+            .reject(&:blank?).uniq
+      scope = scope.where(device_name: names) if names.present?
+
+      @xml_documents = scope
       respond_to do |format|
         format.json { render template: "xml_documents/index", formats: :json }
         format.any  { render json: { error: "Not Acceptable" }, status: :not_acceptable }
