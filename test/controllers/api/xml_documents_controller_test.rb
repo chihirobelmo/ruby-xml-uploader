@@ -51,4 +51,26 @@ class Api::XmlDocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, group_items.size, "expected only one item per user/title/device group"
     assert_equal newer.id, group_items.first["id"], "expected the newest document to be returned"
   end
+
+  test "JSON includes aggregated download_count for user/title/device group" do
+    user = User.create!(email: "count@example.com", username: "counter", password: "secret123", password_confirmation: "secret123")
+    # Create two docs in the same group
+    d1 = XmlDocument.new(title: "Agg", description: "one", user: user)
+    d1.xml_file.attach(io: File.open(Rails.root.join("test/fixtures/files/sample.xml")), filename: "Setup.v100.DeviceX {A}.xml", content_type: "application/xml")
+    d1.save!
+    d2 = XmlDocument.new(title: "Agg", description: "two", user: user)
+    d2.xml_file.attach(io: File.open(Rails.root.join("test/fixtures/files/sample.xml")), filename: "Setup.v100.DeviceX {B}.xml", content_type: "application/xml")
+    d2.save!
+
+    # Create download events: 2 for d1, 3 for d2 (total 5)
+    2.times { XmlDownload.create!(xml_document: d1) }
+    3.times { XmlDownload.create!(xml_document: d2) }
+
+    get "/api/xml_documents.json"
+    assert_response :success
+    body = JSON.parse(@response.body)
+    item = body.find { |h| h["title"] == "Agg" && h["device_name"] == "DeviceX" && h["username"] == "counter" }
+    assert item, "expected aggregated item present"
+    assert_equal 5, item["download_count"], "expected aggregated download_count across group"
+  end
 end
