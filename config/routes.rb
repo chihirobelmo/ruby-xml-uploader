@@ -18,7 +18,11 @@ Rails.application.routes.draw do
   # Bearer token issue/revoke
   resource :token, only: [:create, :destroy], controller: "tokens"
   # Protected API endpoints
-  resources :xml_documents, only: [:index]
+    resources :xml_documents, only: [:index] do
+      member do
+        get :download
+      end
+    end
   end
   
   root 'xml_documents#index'

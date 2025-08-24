@@ -1,12 +1,23 @@
 # encoding: UTF-8
 module Api
   class XmlDocumentsController < ApplicationController
-    include ApiAuthenticatable
+  include ApiAuthenticatable
+  skip_before_action :authenticate_bearer!, only: [:index, :download]
 
-    # GET /api/xml_documents.json
+    # GET /api/xml_documents.json (public)
     def index
       docs = XmlDocument.with_attached_xml_file.includes(:user).order(created_at: :desc)
       render json: docs.map { |d| serialize_doc(d) }
+    end
+
+    # GET /api/xml_documents/:id/download (public)
+    def download
+      doc = XmlDocument.find(params[:id])
+      if doc.xml_file.attached?
+        redirect_to rails_blob_path(doc.xml_file, disposition: "attachment")
+      else
+        render json: { error: 'Not Found' }, status: :not_found
+      end
     end
 
     private
