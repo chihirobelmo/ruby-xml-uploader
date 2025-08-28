@@ -31,7 +31,7 @@ Notes
 - To switch to S3, see Configuration below.
 
 ## Architecture Overview
-Client (Browser/Windows app) ¨ Rails (Controllers) ¨ Models/Active Storage ¨ DB + storage ¨ Views/JSON
+Client (Browser/Windows app) -> Rails (Controllers) -> Models/Active Storage -> DB + storage -> Views/JSON
 
 Main relations
 - User 1?* XmlDocument 1?* XmlDownload
@@ -42,7 +42,7 @@ Main relations
 Auth (token issuance)
 - POST /api/token
 	- Body: { "email": "user@example.com", "password": "..." }
-	- 201 ¨ { "token": "..." }, 401 on failure
+	- 201 -> { "token": "..." }, 401 on failure
 - DELETE /api/token
 	- Header: Authorization: Bearer <token>
 	- 204 on success, 401 if invalid
@@ -50,17 +50,17 @@ Auth (token issuance)
 List XMLs (public JSON)
 - GET /api/xml_documents.json
 	- Optional filter: `?device_name=A,B` or `?device_name[]=A&device_name[]=B`
-	- 200 ¨ JSON array of documents (title, device_name, etc.)
+	- 200 -> JSON array of documents (title, device_name, etc.)
 
 Upload XML (protected)
 - POST /api/xml_documents
 	- Header: Authorization: Bearer <token>
 	- multipart/form-data: `title` (req), `description` (opt), `xml_file` (req)
-	- 201 ¨ { id, title, device_name }, 422 on validation errors
+	- 201 -> { id, title, device_name }, 422 on validation errors
 
 Download (public redirect to blob)
 - GET /api/xml_documents/:id/download
-	- 302 ¨ Active Storage blob URL (attachment disposition)
+	- 302 -> Active Storage blob URL (attachment disposition)
 
 ### Example Responses
 - Token create (201)
@@ -92,7 +92,7 @@ Security/SSL
 
 ## Testing
 - Gems: RSpec is not configured; Rails default test with Capybara/Selenium available.
-- Suggested scenarios: login ¨ upload ¨ list ¨ download; unauthorized access rejection; API contract tests.
+- Suggested scenarios: login -> upload -> list -> download; unauthorized access rejection; API contract tests.
 - Run
 	- bin/rails test
 
