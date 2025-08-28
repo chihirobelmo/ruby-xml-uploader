@@ -34,8 +34,8 @@ Notes
 Client (Browser/Windows app) -> Rails (Controllers) -> Models/Active Storage -> DB + storage -> Views/JSON
 
 Main relations
-- User 1?* XmlDocument 1?* XmlDownload
-- XmlDocument ?1 ActiveStorage attachment (`xml_file`)
+- User 1-* XmlDocument 1-* XmlDownload
+- XmlDocument -1 ActiveStorage attachment (`xml_file`)
 
 ## API Quick Reference (for Windows client)
 
