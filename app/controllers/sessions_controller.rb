@@ -14,9 +14,9 @@ class SessionsController < ApplicationController
       else
         forget(user)
       end
-      redirect_to root_path, notice: 'ログインしました'
+      redirect_to root_path, notice: 'Logged-In'
     else
-      flash.now[:alert] = 'メールアドレスまたはパスワードが違います'
+      flash.now[:alert] = 'Wrong email or pass'
       render :new, status: :unprocessable_entity
     end
   end
@@ -24,7 +24,7 @@ class SessionsController < ApplicationController
   def destroy
     forget(current_user)
     session.delete(:user_id)
-    redirect_to root_path, notice: 'ログアウトしました'
+    redirect_to root_path, notice: 'Logged-Out'
   end
 
   private
