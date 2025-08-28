@@ -77,3 +77,93 @@ amazon:
 現仕様はトークン照合で全ユーザーを走査します。ユーザー数が多い場合は、検索用ハッシュ（例: SHA-256）を別カラムに保存してO(1)検索に改善可。
 トークン期限（例: 90日）やローテーション方針をルール化するとより安全です。
 API用リクエスト/システムテストの追加を推奨。
+
+# レビュー
+
+## 対応内容
+
+システム全体をアーキテクチャ/セキュリティ/データ/テスト/運用の観点でレビューし、優先度付きアクションを提示
+
+## サマリ
+
+方向性は適切（Rails 7系構成、Active Storage、ユーザー/セッション機能、Docker/Kamal、PWA断片あり）
+セキュリティ/認可/検証/テスト/運用でいくつかのすぐ直せる改善余地がある
+特に「所有者スコープの徹底」「XMLアップロード検証」「システムテスト」は優先
+
+## 強み
+
+- Active Storageでの保存・ダウンロード設計は標準的で拡張（S3）も想定済み
+- 認証（セッション＋Remember）実装の下地あり
+- Docker/Kamalなどデプロイの足場がある
+- PWAの雛形とCSP初期設定あり
+- セキュリティツール（brakeman, rubocop）同梱
+
+## リスク/改善ポイント
+
+- 認可の徹底不足リスク：XmlDocumentがユーザーに紐づくが、コントローラでcurrent_userスコープ限定が徹底されているか要確認
+- アップロード検証不足リスク：拡張子/Content-Type/サイズ/ウイルススキャンのバリデーションが未定義なら追加推奨
+- セッション/クッキー設定：productionでsecure/httponly/SameSiteの明示とトークン期限のルール化
+- 大規模化時の照合コスト：RememberトークンはO(n)検索になりがち。検索用ハッシュ列の追加または別テーブル運用を検討
+- テスト不足：システムテスト・リクエストテストが未整備（MEMOの指摘通り）
+- ストレージメンテ：孤立Blobの定期パージやバックアップ/ライフサイクルの運用設計
+- インデックス：users(email/username), xml_documents(user_id, created_at) などのDBインデックス最適化
+- 例外/監視：アップ/ダウンロード失敗時の例外処理、通知、メトリクス未整備
+- API/CORS分離：API用BaseControllerとCSRF方針の切り出し
+- 優先度付きアクション
+
+### Now
+
+- 認可の徹底: すべてのXmlDocument参照/更新/削除をcurrent_user.xml_documentsに限定（before_action + スコープ）。ID直打ち防止。
+- アップロード検証: Active Storageのcontent_type/サイズバリデーション、XMLの最小パースチェック（well-formedness）。危険拡張子拒否。
+- クッキー設定: productionのremember cookieに secure: true, httponly: true, same_site: :lax（もしくは:strict）を明示。
+- システムテスト追加: ログイン→XMLアップロード→一覧表示/ダウンロードまでのハッピーパス＋権限外アクセス拒否の2本。
+
+### Next
+
+- リクエストテスト: XMLアップロード/ダウンロード/認可のAPI/HTML双方を網羅。
+- DBインデックス: users(email, username)ユニーク、xml_documents(user_id, created_at)追加。
+- ストレージ運用: active_storage:purge_unattached の定期タスク、容量監視。
+- 例外処理: ActiveStorage::FileNotFoundError など rescueして404/410、ユーザー向けメッセージ整備。
+- CI: rubocop/brakeman/test をGitHub Actionsで自動化。
+
+### Later
+
+- 速度/耐障害性: 大きなXMLはストリーミングダウンロード、バックグラウンド解析。
+- セキュリティ強化: rack-attackでログイン試行制限、パスワードポリシー、rememberトークンのローテーション/期限。
+- クラウド移行: S3設定の本番適用（転送暗号化、バケットポリシー、ライフサイクル）。
+- PWA: manifest/service workerの仕上げ（オフライン表示/アイコン/Scope）。
+
+## テスト計画（最小）
+
+### System
+
+ユーザーがログイン→XMLをアップロード→一覧でファイル名が見える→ダウンロードで元ファイル名保存
+別ユーザーのXMLにアクセスすると404/403
+
+### Request/Model
+
+content_type/サイズバリデーション通過/失敗
+不正XML（壊れたXML）でアップロード拒否
+current_userスコープでのみ検索されること
+
+### タスク
+
+purge_unattachedが動作することのスモーク
+
+## セキュリティ詳細チェック項目
+
+- CSRF: HTMLは有効、APIはBaseControllerで方針分離（CSRF無効＋JWT等）を検討
+- クッキー: secure/httponly/SameSite、本番でのみ有効化切替
+- Rememberトークン: 平文保存禁止、定期失効、ログアウトで無効化
+- ファイル検証: MIMEスニッフィング対策、ファイル名サニタイズ、サイズ上限、（可能なら）ClamAVなどのAVスキャン
+- 権限: controllerで所有者チェック、ビューでの条件出し分け
+
+## 運用/観測
+
+- ログ最小化（PII配慮）、lograge導入検討
+- 例外通知（Sentry等）
+- ヘルスチェック/監視（ディスク容量・キュー滞留）
+
+## 補足（S3移行）
+
+Gem/credentials/storage.yml設定はMEMO通りで妥当。加えてバケット暗号化、VPCエンドポイント、IAM最小権限、ライフサイクルで古いバージョンや一時ファイルを自動整理。
