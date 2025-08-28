@@ -5,10 +5,10 @@ class XmlDocumentsController < ApplicationController
   before_action :set_xml_document, only: [:show, :edit, :update, :destroy, :download]
 
   def index
-  # Eager-load attachment to avoid N+1 when rendering JSON
-  @xml_documents = XmlDocument.with_attached_xml_file.includes(:user).all
-  # Preload download counts without N+1 queries
-  @download_counts = XmlDownload.group(:xml_document_id).count
+    # Eager-load attachment to avoid N+1 when rendering JSON
+    @xml_documents = XmlDocument.with_attached_xml_file.includes(:user).all
+    # Preload download counts without N+1 queries
+    @download_counts = XmlDownload.group(:xml_document_id).count
   end
 
   def show
@@ -23,7 +23,7 @@ class XmlDocumentsController < ApplicationController
   @xml_document.user = current_user if user_signed_in?
     
     if @xml_document.save
-  redirect_to @xml_document, notice: 'XML file uploaded successfully.'
+      redirect_to @xml_document, notice: 'XML file uploaded successfully.'
     else
       render :new
     end
@@ -34,7 +34,7 @@ class XmlDocumentsController < ApplicationController
 
   def update
     if @xml_document.update(xml_document_params)
-  redirect_to @xml_document, notice: 'XML file updated successfully.'
+      redirect_to @xml_document, notice: 'XML file updated successfully.'
     else
       render :edit
     end
@@ -42,7 +42,7 @@ class XmlDocumentsController < ApplicationController
 
   def destroy
     @xml_document.destroy
-  redirect_to xml_documents_path, notice: 'XML file deleted successfully.'
+    redirect_to xml_documents_path, notice: 'XML file deleted successfully.'
   end
 
   def download
